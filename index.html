@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CTES | Clean Emission Architecture</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      font-family: -apple-system, system-ui, sans-serif;
+      overflow: hidden;
+      color: white;
+    }
+
+    #ui {
+      position: absolute;
+      top: 40px;
+      left: 40px;
+      max-width: 320px;
+      z-index: 10;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 500;
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+
+    p {
+      font-size: 13px;
+      color: #888;
+      line-height: 1.6;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="ui">
+  <h1>CTES</h1>
+  <p>
+    Carbon-Treating Exhaust System. A theoretical exhaust architecture
+    designed to reduce net carbon output at the point of emission.
+  </p>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+
+const camera = new THREE.PerspectiveCamera(
+  45,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  100
+);
+camera.position.set(0, 1.2, 5);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.6;
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+keyLight.position.set(5, 5, 5);
+scene.add(keyLight);
+
+const loader = new GLTFLoader();
+loader.load(
+  './exhaust.glb',
+  (gltf) => {
+    const model = gltf.scene;
+    model.scale.set(1.4, 1.4, 1.4);
+    model.rotation.y = Math.PI;
+    scene.add(model);
+  },
+  undefined,
+  (error) => {
+    console.error('GLB load error:', error);
+  }
+);
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+
+</body>
+</html>
