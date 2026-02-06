@@ -1,50 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>CTES | Clean Emission Architecture</title>
+<meta charset="UTF-8">
+<title>CTES | Carbon-Treating Exhaust System</title>
 
-  <style>
-    body {
-      margin: 0;
-      background: #000;
-      font-family: -apple-system, system-ui, sans-serif;
-      overflow: hidden;
-      color: white;
-    }
+<style>
+  body {
+    margin: 0;
+    background: #000;
+    overflow: hidden;
+    color: white;
+    font-family: -apple-system, system-ui, sans-serif;
+  }
 
-    #ui {
-      position: absolute;
-      top: 40px;
-      left: 40px;
-      max-width: 320px;
-      z-index: 10;
-    }
+  /* ===== UI TEXT ===== */
+  #ui {
+    position: absolute;
+    top: 32px;
+    left: 32px;
+    max-width: 360px;
+    z-index: 10;
+  }
 
-    h1 {
-      font-size: 24px;
-      font-weight: 500;
-      margin: 0;
-      letter-spacing: -0.5px;
-    }
+  h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+  }
 
-    p {
-      font-size: 13px;
-      color: #888;
-      line-height: 1.6;
-      margin-top: 10px;
-    }
-  </style>
+  .subtitle {
+    font-size: 13px;
+    color: #aaa;
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  /* ===== ARROW LABELS ===== */
+  .label {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: #ddd;
+    opacity: 0;
+    animation: fadeIn 1s ease forwards;
+  }
+
+  .label span {
+    max-width: 160px;
+    line-height: 1.4;
+  }
+
+  .arrow {
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(to right, #00aaff, transparent);
+    position: relative;
+    animation: pulse 2s infinite;
+  }
+
+  .arrow::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -3px;
+    width: 6px;
+    height: 6px;
+    border-right: 1px solid #00aaff;
+    border-top: 1px solid #00aaff;
+    transform: rotate(45deg);
+  }
+
+  /* Positions (tuned for centered exhaust) */
+  #stage1 { top: 45%; left: 60%; animation-delay: 0.3s; }
+  #stage2 { top: 52%; left: 62%; animation-delay: 0.6s; }
+  #stage3 { top: 59%; left: 60%; animation-delay: 0.9s; }
+
+  @keyframes pulse {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.4; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+</style>
 </head>
 
 <body>
 
 <div id="ui">
   <h1>CTES</h1>
-  <p>
-    Carbon-Treating Exhaust System. A theoretical exhaust architecture
-    designed to reduce net carbon output at the point of emission.
-  </p>
+  <div class="subtitle">
+    Carbon-Treating Exhaust System.<br>
+    A theoretical architecture for reducing carbon output directly at the exhaust.
+  </div>
+</div>
+
+<!-- Floating labels -->
+<div class="label" id="stage1">
+  <div class="arrow"></div>
+  <span>Stage 1 — Particle filtration removes soot and solids</span>
+</div>
+
+<div class="label" id="stage2">
+  <div class="arrow"></div>
+  <span>Stage 2 — Catalytic conversion reduces harmful gases</span>
+</div>
+
+<div class="label" id="stage3">
+  <div class="arrow"></div>
+  <span>Stage 3 — Carbon capture layer traps CO₂ before release</span>
 </div>
 
 <script type="importmap">
@@ -63,56 +133,52 @@ import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
 
-const camera = new THREE.PerspectiveCamera(
-  45,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  100
-);
-camera.position.set(0, 1.2, 5);
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 1000);
+camera.position.set(0, 1, 5);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.autoRotate = true;
-controls.autoRotateSpeed = 0.6;
+controls.autoRotateSpeed = 0.5;
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+scene.add(new THREE.AmbientLight(0xffffff, 1));
 
-const keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
-keyLight.position.set(5, 5, 5);
-scene.add(keyLight);
+const key = new THREE.DirectionalLight(0xffffff, 3);
+key.position.set(5, 5, 5);
+scene.add(key);
 
 const loader = new GLTFLoader();
-loader.load(
-  './exhaust.glb',
-  (gltf) => {
-    const model = gltf.scene;
-    model.scale.set(1.4, 1.4, 1.4);
-    model.rotation.y = Math.PI;
-    scene.add(model);
-  },
-  undefined,
-  (error) => {
-    console.error('GLB load error:', error);
-  }
-);
+loader.load('./exhaust.glb', (gltf) => {
+  const model = gltf.scene;
+
+  const box = new THREE.Box3().setFromObject(model);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+
+  model.position.sub(center);
+
+  const maxDim = Math.max(size.x, size.y, size.z);
+  model.scale.setScalar(2 / maxDim);
+
+  scene.add(model);
+});
 
 function animate() {
-  requestAnimationFrame(animate);
   controls.update();
   renderer.render(scene, camera);
+  requestAnimationFrame(animate);
 }
 animate();
 
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(innerWidth, innerHeight);
 });
 </script>
 
